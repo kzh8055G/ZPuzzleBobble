@@ -6,7 +6,7 @@ public class Utility
 {
 	public static void SetSpriteAlpha(GameObject _object, float _alpha)
 	{
-		var renderer = _object.GetComponent<SpriteRenderer>();
+		var renderer = _object.GetComponentInChildren<SpriteRenderer>();
 		if (renderer)
 		{
 			var color = renderer.material.color;
@@ -15,7 +15,7 @@ public class Utility
 		}
 	}
 
-	public static void SetBubbleColor(GameObject _bubbleObject, Bubble.EBubbleColor _bubbleColor)
+	public static void SetBubbleColor(GameObject _bubbleObject, EBubbleColor _bubbleColor)
 	{
 		if (_bubbleObject)
 		{

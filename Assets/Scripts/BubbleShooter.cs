@@ -25,7 +25,10 @@ public class BubbleShooter : MonoBehaviour
 	[SerializeField]
 	float shootGuideLength = 5.0f;
 
-#region Raycast
+	[SerializeField]
+	bool enablePreviewHitBubble = false;
+
+	#region Raycast
 	[SerializeField]
 	private LayerMask reflectLayerMask;
 
@@ -38,7 +41,7 @@ public class BubbleShooter : MonoBehaviour
 #endregion
 	float shootAngle = 90f;
 
-	private Bubble.EBubbleColor BubbleColor = Bubble.EBubbleColor.Blue;
+	private EBubbleColor BubbleColor = EBubbleColor.Blue;
 
 	private TextMesh textShootInfo;
 
@@ -50,13 +53,20 @@ public class BubbleShooter : MonoBehaviour
 		contactFilter.layerMask = reflectLayerMask;
 		contactFilter.useLayerMask = true;
 		contactFilter.useTriggers = false;
+
+		stage.OnLevelStart.AddListener((_level) =>
+			{
+				UpdateShootInfoText();
+				UpdateNextBubble(stage.GetNextShootBubbleColor());
+			}
+		);
 	}
 
 	// Start is called before the first frame update
 	void Start()
     {
-		UpdateShootInfoText();
-		UpdateNextBubble(BubbleColor);
+		//UpdateShootInfoText();
+		//UpdateNextBubble(stage.GetNextShootBubbleColor());
 	}
 
     // Update is called once per frame
@@ -87,31 +97,30 @@ public class BubbleShooter : MonoBehaviour
 			ShootBubble();
 
 			// 다음 방울을 결정
-			var BubbleColors = Enum.GetValues(typeof(Bubble.EBubbleColor)).Cast<Bubble.EBubbleColor>().ToList();
-			BubbleColor = BubbleColors[Random.Range(0, BubbleColors.Count - 1)];
-
-			UpdateNextBubble(BubbleColor);
+			//var BubbleColors = Enum.GetValues(typeof(Bubble.EBubbleColor)).Cast<Bubble.EBubbleColor>().ToList();
+			//BubbleColor = BubbleColors[Random.Range(0, BubbleColors.Count - 1)];
+			UpdateNextBubble(stage.GetNextShootBubbleColor());
 
 		}
 		// {@ Cheat Change Bubble Color
 		if (Input.GetKeyDown(KeyCode.R))
 		{
-			BubbleColor = Bubble.EBubbleColor.Red;
+			BubbleColor = EBubbleColor.Red;
 			UpdateShootInfoText();
 		}
 		if (Input.GetKeyDown(KeyCode.G))
 		{
-			BubbleColor = Bubble.EBubbleColor.Green;
+			BubbleColor = EBubbleColor.Green;
 			UpdateShootInfoText();
 		}
 		if (Input.GetKeyDown(KeyCode.B))
 		{
-			BubbleColor = Bubble.EBubbleColor.Blue;
+			BubbleColor = EBubbleColor.Blue;
 			UpdateShootInfoText();
 		}
 		if (Input.GetKeyDown(KeyCode.Y))
 		{
-			BubbleColor = Bubble.EBubbleColor.Yellow;
+			BubbleColor = EBubbleColor.Yellow;
 			UpdateShootInfoText();
 		}
 		// @}
@@ -136,8 +145,9 @@ public class BubbleShooter : MonoBehaviour
 		}
 	}
 
-	private void UpdateNextBubble(Bubble.EBubbleColor _bubbleColor)
+	private void UpdateNextBubble(EBubbleColor _bubbleColor)
 	{
+		BubbleColor = _bubbleColor;
 		Utility.SetBubbleColor(NextBubble, _bubbleColor);
 		//if (NextBubble != null)
 		//{
@@ -169,6 +179,8 @@ public class BubbleShooter : MonoBehaviour
 			int count = Physics2D.Raycast(LastestPoint, rayDirection, contactFilter, hitBuffer, CurrentGuideLength);
 
 			// {@ Ray 를 발사해 방울에 hit 하는지 여부 판단
+
+			if(enablePreviewHitBubble)
 			{
 				Ray ray = new Ray();
 				ray.direction = rayDirection;

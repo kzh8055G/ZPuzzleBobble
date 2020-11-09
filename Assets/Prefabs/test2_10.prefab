@@ -104,9 +104,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8653284967870695083}
+  - component: {fileID: 8653284967870695085}
   - component: {fileID: 8653284967870695082}
   - component: {fileID: 8653284967870695084}
-  - component: {fileID: 8653284967870695085}
   m_Layer: 0
   m_Name: test2_10
   m_TagString: Untagged
@@ -129,6 +129,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8653284967870695085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8653284967870695081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 407b30c45e40bcb4a93665c1e4b13524, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NextBubble: {fileID: 0}
+  BubblePrefab: {fileID: 842741851572506104, guid: 65415e8485fb64b4ab2f7cad4cc6c7d2, type: 3}
+  stage: {fileID: 0}
+  BubbleVelocity: 2.5
+  shootAngleChangeVelocity: 50
+  shootGuideLength: 5
+  reflectLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
 --- !u!212 &8653284967870695082
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -199,17 +220,3 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &8653284967870695085
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8653284967870695081}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 407b30c45e40bcb4a93665c1e4b13524, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  BubblePrefab: {fileID: 842741851572506104, guid: 65415e8485fb64b4ab2f7cad4cc6c7d2, type: 3}
-  stage: {fileID: 0}

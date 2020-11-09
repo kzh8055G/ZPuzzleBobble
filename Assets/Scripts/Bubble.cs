@@ -3,59 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
+// 1. 배치된 Bubble, 2. 히트한 Bubble
+public class OnBubbleHitEvent : UnityEvent<Bubble, Bubble> { };
+
 public class Bubble : MonoBehaviour
 {
-	public enum EBubbleColor
+
+	private EBubbleColor bubbleColor = EBubbleColor.Blue;
+	public EBubbleColor BubbleColor
 	{
-		Red		= 0,
-		Green	= 1,
-		Blue	= 2,
-		Yellow	= 3,
-		Orange	= 4,
-		Gray	= 5,
-		Purple	= 6,
-
+		get
+		{
+			return bubbleColor;
+		}
+		set
+		{
+			if (bubbleColor != value)
+			{
+				bubbleColor = value;
+				_UpdateColor();
+			}
+		}
 	}
-	// 배치된 Bubble, 히트한 Bubble
-	public class OnHitBubbleEvent : UnityEvent<Bubble, Bubble> { };
 
-	public EBubbleColor BubbleColor { get; set; } = EBubbleColor.Blue;
+	public OnBubbleHitEvent OnBubbleHit = new OnBubbleHitEvent();
 
-	public OnHitBubbleEvent OnHitBubble = new OnHitBubbleEvent();
-
-	public Vector2 Cell { get; private set; }
+	public Vector2 PlacedCell { get; private set; }
 	public bool IsPlaced { get; private set; }
+	
+	private Animator animator;
+	private SpriteRenderer renderer;
 
 	private TextMesh debugText;
 
-	private Animator animator;
-
 	private void Awake()
 	{
+		animator = GetComponentInChildren<Animator>();
+		renderer = GetComponentInChildren<SpriteRenderer>();
+
 		debugText = GetComponentInChildren<TextMesh>();
 		debugText.text = string.Empty;
-
-		animator = GetComponent<Animator>();
 	}
 
 	void Start()
 	{
-		int colorIndex = (int)BubbleColor;
-		animator.SetInteger("Color", colorIndex);
-		//animator.enabled = false;
-
+		_UpdateColor();
 	}
 	// Update is called once per frame
 	void Update()
-	{
+	{}
 
-	}
-
-	public void Place(Vector2 _cell)
+	public void PlaceInCell(Vector2 _cell)
 	{
-		Cell = _cell;
+		PlacedCell = _cell;
 		IsPlaced = true;
-		if(debugText != null)
+		if (debugText != null)
 		{
 			debugText.text = string.Empty;
 			//debugText.text = string.Format("{0},{1} : {2}", Cell.x, Cell.y, GetColorString(BubbleColor));
@@ -66,10 +68,7 @@ public class Bubble : MonoBehaviour
 
 	private void OnTriggerEnter2D(Collider2D collision)
 	{
-		//Ray ray;
-		//ray.
-		//collision.bounds.IntersectRay()
-		// 이미 자리잡고 있다면 아무것도 하지 않는다
+		// already placed, ignore trigger event
 		if (IsPlaced)
 		{
 			return;
@@ -77,9 +76,15 @@ public class Bubble : MonoBehaviour
 		var adjecentBubble = collision.GetComponent<Bubble>();
 		if (adjecentBubble != null)
 		{
-			Debug.Log(string.Format("adjacent Bubble Cell X : {0}, Cell Y : {1}", adjecentBubble.Cell.x, adjecentBubble.Cell.y));
-			OnHitBubble.Invoke(adjecentBubble, this);
+			//Debug.Log(string.Format("adjacent Bubble Cell X : {0}, Cell Y : {1}", adjecentBubble.PlacedCell.x, adjecentBubble.PlacedCell.y));
+			OnBubbleHit.Invoke(adjecentBubble, this);
 		}
+	}
+
+	private void _UpdateColor()
+	{
+		int colorIndex = (int)BubbleColor;
+		animator.SetInteger("Color", colorIndex);
 	}
 
 	#region Debug
@@ -87,7 +92,6 @@ public class Bubble : MonoBehaviour
 	{
 		Utility.SetSpriteAlpha(gameObject, _alpha);
 	}
-
 
 	public void Shoot(float _angle
 		, float _velocity
@@ -99,6 +103,67 @@ public class Bubble : MonoBehaviour
 			moveController.StartMoving(_angle, _velocity, _contactFilterLayerMask);
 		}
 	}
+
+	public void SetSpritePostion(Vector2 _position)
+	{
+		renderer.transform.localPosition = _position;
+	}
+
+	//public void StartVibrate(int _step)
+	//{
+
+	//	StopVibrate();
+	//	coroutineVibrate = StartCoroutine(_Vibrate(_step));
+
+	//}
+
+	//public void StopVibrate()
+	//{
+	//	if (coroutineVibrate != null)
+	//	{
+	//		StopCoroutine(coroutineVibrate);
+	//		coroutineVibrate = null;
+	//	}
+	//	if(renderer != null)
+	//	{
+	//		renderer.transform.localPosition = Vector2.zero;
+	//	}
+	//}
+
+	//private IEnumerator _Vibrate(int _step)
+	//{
+	//	// to
+	//	const float limit = 0.02f;
+	//	const float delta = 0.01f;
+	//	float sign = 1;
+
+	//	float delaySeconds = 0.0f;
+	//	if (_step == 1)
+	//	{
+	//		delaySeconds = 0.01f;
+	//	}
+	//	else if(_step == 2)
+	//	{
+	//		delaySeconds = 0.006f;
+	//	}
+
+	//	float currentX = 0f;
+	//	while (true)
+	//	{
+	//		float currentDelta = sign > 0 ? delta : -delta;
+	//		currentX += currentDelta;
+
+	//		if( Mathf.Abs(currentX) > limit)
+	//		{
+	//			currentX = sign * limit;
+
+	//			sign *= -1; // 
+	//		}
+	//		renderer.transform.localPosition = new Vector3(currentX, 0);
+
+	//		yield return new WaitForSeconds(delaySeconds);
+	//	}
+	//}
 
 	public void Boom()
 	{
@@ -156,7 +221,7 @@ public class Bubble : MonoBehaviour
 
 	public string GetInfoString()
 	{
-		return string.Format("{0} : {1}, {2}", GetColorString(BubbleColor), Cell.x, Cell.y);
+		return string.Format("{0} : {1}, {2}", GetColorString(BubbleColor), PlacedCell.x, PlacedCell.y);
 	}
 	
 	private static Color[] presetColors = {
@@ -188,15 +253,17 @@ public class Bubble : MonoBehaviour
 
 	public void DrawHexagon(float _CellRadius)
 	{
-		Vector2 CenterPos = new Vector2(transform.position.x, transform.position.y);
-		for (int i = 0; i < 6; ++i)
-		{
-			Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
-			int secondIndex = i >= 5 ? 0 : i + 1;
-			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
+		DrawHexgon(transform.position, _CellRadius, Color.green);
 
-			Debug.DrawLine(firstPoint, secondPoint, Color.green);// presetColors[i]);
-		}
+		//Vector2 CenterPos = new Vector2(transform.position.x, transform.position.y);
+		//for (int i = 0; i < 6; ++i)
+		//{
+		//	Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
+		//	int secondIndex = i >= 5 ? 0 : i + 1;
+		//	Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
+
+		//	Debug.DrawLine(firstPoint, secondPoint, Color.green);// presetColors[i]);
+		//}
 
 		//for (int i = 0; i < 6; ++i)
 		//{
@@ -225,6 +292,18 @@ public class Bubble : MonoBehaviour
 	//		renderer.material.color = color;
 	//	}
 	//}
+	public static void DrawHexgon(Vector2 _center, float _CellRadius, Color _color)
+	{
+		Vector2 CenterPos = new Vector2(_center.x, _center.y);
+		for (int i = 0; i < 6; ++i)
+		{
+			Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
+			int secondIndex = i >= 5 ? 0 : i + 1;
+			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
+
+			Debug.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
+		}
+	}
 
 	public static string GetColorString(EBubbleColor _color)
 	{
