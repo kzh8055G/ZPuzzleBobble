@@ -91,12 +91,4 @@ public class BubbleMoveController : MonoBehaviour
 			hitBuffer[i] = new RaycastHit2D();
 		}
 	}
-	#region Utility
-
-	public static float GetAngleBetweenVector(Vector3 from, Vector3 to)
-	{
-		return Mathf.Acos(Mathf.Clamp(Vector3.Dot(from.normalized, to.normalized), -1f, 1f)) * 57.29578f;
-	}
-
-	#endregion
 }

@@ -87,7 +87,7 @@ public class Bubble : MonoBehaviour
 		animator.SetInteger("Color", colorIndex);
 	}
 
-	#region Debug
+	//#region Debug
 	public void SetAlpha(float _alpha)
 	{
 		Utility.SetSpriteAlpha(gameObject, _alpha);
@@ -108,62 +108,6 @@ public class Bubble : MonoBehaviour
 	{
 		renderer.transform.localPosition = _position;
 	}
-
-	//public void StartVibrate(int _step)
-	//{
-
-	//	StopVibrate();
-	//	coroutineVibrate = StartCoroutine(_Vibrate(_step));
-
-	//}
-
-	//public void StopVibrate()
-	//{
-	//	if (coroutineVibrate != null)
-	//	{
-	//		StopCoroutine(coroutineVibrate);
-	//		coroutineVibrate = null;
-	//	}
-	//	if(renderer != null)
-	//	{
-	//		renderer.transform.localPosition = Vector2.zero;
-	//	}
-	//}
-
-	//private IEnumerator _Vibrate(int _step)
-	//{
-	//	// to
-	//	const float limit = 0.02f;
-	//	const float delta = 0.01f;
-	//	float sign = 1;
-
-	//	float delaySeconds = 0.0f;
-	//	if (_step == 1)
-	//	{
-	//		delaySeconds = 0.01f;
-	//	}
-	//	else if(_step == 2)
-	//	{
-	//		delaySeconds = 0.006f;
-	//	}
-
-	//	float currentX = 0f;
-	//	while (true)
-	//	{
-	//		float currentDelta = sign > 0 ? delta : -delta;
-	//		currentX += currentDelta;
-
-	//		if( Mathf.Abs(currentX) > limit)
-	//		{
-	//			currentX = sign * limit;
-
-	//			sign *= -1; // 
-	//		}
-	//		renderer.transform.localPosition = new Vector3(currentX, 0);
-
-	//		yield return new WaitForSeconds(delaySeconds);
-	//	}
-	//}
 
 	public void Boom()
 	{
@@ -191,7 +135,6 @@ public class Bubble : MonoBehaviour
 		StartCoroutine(CoroutineBubbleFalling());
 	}
 
-	// Corou
 	private IEnumerator CoroutineBubbleFalling()
 	{
 		debugText.text = "Falling";
@@ -217,24 +160,22 @@ public class Bubble : MonoBehaviour
 		gameObject.SetActive(false);
 	}
 
-
-
 	public string GetInfoString()
 	{
 		return string.Format("{0} : {1}, {2}", GetColorString(BubbleColor), PlacedCell.x, PlacedCell.y);
 	}
 	
-	private static Color[] presetColors = {
-			Color.red,
-			Color.white,
-			Color.yellow,
-			Color.green,
-			Color.gray,
-			Color.cyan
-	};
+	//private static Color[] presetColors = {
+	//		Color.red,
+	//		Color.white,
+	//		Color.yellow,
+	//		Color.green,
+	//		Color.gray,
+	//		Color.cyan
+	//};
 
 	private static List<Vector2> hexagonPoints = new List<Vector2>();
-
+	// for optimization
 	static Bubble()
 	{
 		Vector2 baseVector = Vector2.zero;
@@ -254,56 +195,12 @@ public class Bubble : MonoBehaviour
 	public void DrawHexagon(float _CellRadius)
 	{
 		DrawHexgon(transform.position, _CellRadius, Color.green);
-
-		//Vector2 CenterPos = new Vector2(transform.position.x, transform.position.y);
-		//for (int i = 0; i < 6; ++i)
-		//{
-		//	Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
-		//	int secondIndex = i >= 5 ? 0 : i + 1;
-		//	Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
-
-		//	Debug.DrawLine(firstPoint, secondPoint, Color.green);// presetColors[i]);
-		//}
-
-		//for (int i = 0; i < 6; ++i)
-		//{
-		//	Vector2 secondPoint = CenterPos + hexagonPoints[i] * _CellRadius;
-		//	Debug.DrawLine(CenterPos, secondPoint, Color.yellow);
-		//}
-		//Vector2 sss = Vector2.zero;//
-		//sss.x = CenterPos.x + hexagonPoints[3].x * _CellRadius;
-		//sss.y = CenterPos.y;
-
-		//Debug.DrawLine(CenterPos, sss, Color.red);
-
 	}
 
-	#endregion
+	//#endregion
 
 	#region Utility
 
-	//public static void SetSpriteAlpha(GameObject _object, float _alpha)
-	//{
-	//	var renderer = _object.GetComponent<SpriteRenderer>();
-	//	if (renderer)
-	//	{
-	//		var color = renderer.material.color;
-	//		color.a = _alpha;
-	//		renderer.material.color = color;
-	//	}
-	//}
-	public static void DrawHexgon(Vector2 _center, float _CellRadius, Color _color)
-	{
-		Vector2 CenterPos = new Vector2(_center.x, _center.y);
-		for (int i = 0; i < 6; ++i)
-		{
-			Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
-			int secondIndex = i >= 5 ? 0 : i + 1;
-			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
-
-			Debug.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
-		}
-	}
 
 	public static string GetColorString(EBubbleColor _color)
 	{
@@ -318,6 +215,18 @@ public class Bubble : MonoBehaviour
 		return strColor;
 	}
 
+	public static void DrawHexgon(Vector2 _center, float _CellRadius, Color _color)
+	{
+		Vector2 CenterPos = new Vector2(_center.x, _center.y);
+		for (int i = 0; i < 6; ++i)
+		{
+			Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
+			int secondIndex = i >= 5 ? 0 : i + 1;
+			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
+
+			Debug.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
+		}
+	}
 
 
 	#endregion

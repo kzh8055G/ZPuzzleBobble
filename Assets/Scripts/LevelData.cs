@@ -33,22 +33,3 @@ public class Level
 	public float LimitTime;
 
 }
-
-//public class LevelData : MonoBehaviour
-//{
-
-//	[SerializeField]
-//	public List<Level> Levels = new List<Level>();
-
-//    // Start is called before the first frame update
-//    void Start()
-//    {
-        
-//    }
-
-//    // Update is called once per frame
-//    void Update()
-//    {
-        
-//    }
-//}

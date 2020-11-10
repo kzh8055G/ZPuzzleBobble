@@ -119,20 +119,12 @@ public class TestEdit : MonoBehaviour
 	void Start()
     {
 		_uiCamera = FindObjectOfType<Camera>();
-
-
-		//var instance = GameObject.Instantiate(PrefabLevelData);
-		//if(instance != null)
-		//{
-		//	levelData = instance.GetComponent<LevelData>();
-		//}
-
     }
 
 	// Bubble 을 배치한다
 	private void CreateAndPlaceBubble(Vector2 _cell, EBubbleColor _bubbleColor = EBubbleColor.Blue)
 	{
-		Vector2 bubbleCenter = Stage.ConvertCellToPosition(_cell, cellRadius);
+		Vector2 bubbleCenter = Utility.ConvertCellToPosition(_cell, cellRadius);
 
 		var bubbleInstance = GameObject.Instantiate(Prefab);//, bubbleCenter, Quaternion.identity);
 
@@ -170,7 +162,7 @@ public class TestEdit : MonoBehaviour
 			for(int cy = 0 ; cy < maxCY ; ++cy)
 			{
 				// 겹자를 그리고
-				Vector2 center = Root.transform.TransformPoint(Stage.ConvertCellToPosition(new Vector2(cx, cy), cellRadius)); ;
+				Vector2 center = Root.transform.TransformPoint(Utility.ConvertCellToPosition(new Vector2(cx, cy), cellRadius)); ;
 
 				bool isHit = false;
 				if(!selected)
@@ -212,7 +204,7 @@ public class TestEdit : MonoBehaviour
 		//{
 		//	PreviewBubble.SetActive(true);
 		//}
-		PreviewBubble.transform.localPosition = Stage.ConvertCellToPosition(_cell, cellRadius);
+		PreviewBubble.transform.localPosition = Utility.ConvertCellToPosition(_cell, cellRadius);
 		{
 			Utility.SetSpriteAlpha(PreviewBubble, 0.6f);
 			Utility.SetBubbleColor(PreviewBubble, CurrentBubbleColor);
@@ -321,12 +313,5 @@ public class TestEdit : MonoBehaviour
 			
 		}
 
-	}
-
-
-	private void OnMouseOver()
-	{
-		//Debug.Log("dsds");
-		
 	}
 }

@@ -149,15 +149,6 @@ public class BubbleShooter : MonoBehaviour
 	{
 		BubbleColor = _bubbleColor;
 		Utility.SetBubbleColor(NextBubble, _bubbleColor);
-		//if (NextBubble != null)
-		//{
-		//	var animator = NextBubble.GetComponent<Animator>();
-		//	if (animator != null)
-		//	{
-		//		int colorIndex = (int)_bubbleColor;
-		//		animator.SetInteger("Color", colorIndex);
-		//	}
-		//}
 	}
 	// 발사 가이드를 그린다( 임시다 )
 	private void DrawShootGuide(Vector2 _ShootDirection, float _ShootGuideLength)
@@ -191,7 +182,7 @@ public class BubbleShooter : MonoBehaviour
 				if (stage.FindFirstRayIntersectBubble(ray, ref firstHitBubble, ref distanceFromOrigin))
 				{
 					var hitPosition = LastestPoint + rayDirection * distanceFromOrigin;
-					stage.DrawPreviewHitBubble(firstHitBubble, hitPosition, BubbleColor);
+					//stage.DrawPreviewHitBubble(firstHitBubble, hitPosition, BubbleColor);
 
 					// ray 에 hit 한 방울이 있다면 hit 지점을 points 에 넣고 끝낸다
 					points.Add(hitPosition);
