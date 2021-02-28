@@ -68,6 +68,8 @@ public class Stage : MonoBehaviour
 	public OnLevelClearEvent OnLevelClear = new OnLevelClearEvent();
 	public OnScoreGetEvent OnScoreGet = new OnScoreGetEvent();
 
+	public UnityEvent OnBubbleShootReady = new UnityEvent();
+
 	// TODO : bubbleContainer 로 옮겨야 한다
 	public IReadOnlyList<LayerMask> SideLayerMasks => bubbleContainer.SideLayerMasks;
 
@@ -100,9 +102,9 @@ public class Stage : MonoBehaviour
 
 	public EBubbleColor GetNextShootBubbleColor()
 	{
-		return shootBubblePreset[Random.Range(0, shootBubblePreset.Count - 1)];
+		return shootBubblePreset[Random.Range(0, shootBubblePreset.Count)];
 	}
-	//
+
 	public LayerMask GetAllSideLayerMask()
 	{
 		return bubbleContainer.GetAllSideLayerMask();
@@ -142,35 +144,38 @@ public class Stage : MonoBehaviour
 		bubbleContainer.StartLevel(currentLevel);
 	}
 
-	private void _OnHitBubble(Bubble _placedBubble, Bubble _hitBubble)
+	private void _OnHitBubble(GameObject _hitGameObject, Bubble _hitBubble)
 	{
 		scoreCalculator.Clear();
 
-		bubbleContainer.OnHitBubble(_placedBubble, _hitBubble);
-
-		_UpdateShootBubblePreset();
-		if (!_CheckLevelClear())
+		if( bubbleContainer.OnHitBubble(_hitGameObject, _hitBubble) )
 		{
+			OnScoreGet.Invoke(scoreCalculator.Calculate());
+
+			if(_CheckLevelClear())
+			{
+				return;
+			}
+			if(_CheckGameOver())
+			{
+				_OnGameOver();
+				return;
+			}
 			++currentShootCount;
 			_OnChangeShootCount();
-		}
+			_UpdateShootBubblePreset();
 
-		if (_CheckGameOver())
-		{
-			_OnGameOver();
+			OnBubbleShootReady.Invoke();
 		}
-		OnScoreGet.Invoke(scoreCalculator.Calculate());
 	}
-
 
 	public void OnShootBubbleObject(GameObject _bubbleInstance)
 	{
 		var bubble = _bubbleInstance.GetComponent<Bubble>();
 		if (bubble != null)
 		{
-			bubble.OnBubbleHit.AddListener(_OnHitBubble);
+			bubble.OnBubbleCollision.AddListener(_OnHitBubble);
 		}
-
 	}
 
 	private void _OnChangeShootCount()

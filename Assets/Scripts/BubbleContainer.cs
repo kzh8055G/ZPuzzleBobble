@@ -27,8 +27,9 @@ public class BubbleContainer : MonoBehaviour
 	[SerializeField]
 	GameObject PreviewBubble;
 
-	public IReadOnlyList<LayerMask> SideLayerMasks => sideLayerMasks;
+	[SerializeField]
 	private List<LayerMask> sideLayerMasks = new List<LayerMask>();
+	public IReadOnlyList<LayerMask> SideLayerMasks => sideLayerMasks;
 
 	private List<Bubble> placedBubbles = new List<Bubble>();
 	// Start is called before the first frame update
@@ -40,19 +41,20 @@ public class BubbleContainer : MonoBehaviour
 	public OnBubbleBoomEvent onBubbleBoom = new OnBubbleBoomEvent();
 	public OnBubbleFallEvent onBubbleFall = new OnBubbleFallEvent();
 
+	private static Vector2 InvalidCell = new Vector2(-1, -1);
+
 	private void Awake()
 	{
 		if (sideParent != null)
 		{
-			for (int i = 0; i < sideParent.transform.childCount; ++i)
-			{
-				var sideObject = sideParent.transform.GetChild(i);
-				if (sideObject != null)
-				{
-					sideLayerMasks.Add(sideObject.gameObject.layer);
-				}
-			}
-
+			//for (int i = 0; i < sideParent.transform.childCount; ++i)
+			//{
+			//	var sideObject = sideParent.transform.GetChild(i);
+			//	if (sideObject != null)
+			//	{
+			//		sideLayerMasks.Add(sideObject.gameObject.layer);
+			//	}
+			//}
 			initSideParentPosition = sideParent.transform.localPosition;
 		}
 		if(bubbleParent != null)
@@ -74,12 +76,16 @@ public class BubbleContainer : MonoBehaviour
 
 	public LayerMask GetAllSideLayerMask()
 	{
-		LayerMask layerMask = 0;
-		foreach (var mask in sideLayerMasks)
-		{
-			layerMask |= 1 << mask;
-		}
-		return layerMask;
+		//LayerMask layerMask = 0;
+		//foreach (var mask in sideLayerMasks)
+		//{
+		//	layerMask |= 1 << mask;
+		//}
+		//string strLayerName = LayerMask.LayerToName(layerMask);
+		//return layerMask;
+
+
+		return sideLayerMasks[0];
 	}
 
 	private void _AttachBubble(Bubble _bubble, Vector2 _cell)
@@ -178,29 +184,51 @@ public class BubbleContainer : MonoBehaviour
 		}
 	}
 
-	public void OnHitBubble(Bubble _placedBubble, Bubble _hitBubble)
+
+	
+
+	public bool OnHitBubble(GameObject _hitGameObject, Bubble _hitBubble)
 	{
-		// hitBubble 은 아직 BubbleParent 의 자식이 아니므로 
-		// BubbleParent 기준으로 hitBubble 좌표를 얻어낸다 ( 좌표 일치화를 위해 )
-		Vector2 hitBubblePosition = bubbleParent.transform.InverseTransformPoint(_hitBubble.transform.position);
-		var newCell = _FindHitBubbleAdjacentCell(_placedBubble, hitBubblePosition);
-		if (newCell != Vector2.zero)
+		if (_hitGameObject == null)
 		{
-			// 일단 움직임을 멈추고
+			return false;
+		}
+
+		bool collisionWithTop = _hitGameObject.layer == LayerMask.NameToLayer("Reflect_Top");
+		var placedBubble = _hitGameObject.GetComponent<Bubble>();
+		if (placedBubble != null || collisionWithTop)
+		{
 			var moveController = _hitBubble.GetComponent<BubbleMoveController>();
 			if (moveController != null)
 			{
 				moveController.StopMoving();
 			}
-			// 배치한다
-			_AttachBubble(_hitBubble, newCell);
-			// 같은 색을 가진 bubble 을 제거
-			if (_RemoveSameColorBubbles(_hitBubble))
+			// hitBubble 은 아직 BubbleParent 의 자식이 아니므로 
+			// BubbleParent 기준으로 hitBubble 좌표를 얻어낸다 ( 좌표 일치화를 위해 )
+			Vector2 hitBubblePosition = bubbleParent.transform.InverseTransformPoint(_hitBubble.transform.position);
+			Vector2 newCell = InvalidCell;
+			if (placedBubble != null)
 			{
-				// 사라진 Bubble 들이 존재 한다면 이제 연결이 끊어진 Bubble 들을 찾아본다
-				_FallLinkOffBubbles();
+				newCell = _FindHitBubbleAdjacentCell(placedBubble, hitBubblePosition);
 			}
+			else if (collisionWithTop)
+			{
+				newCell = _FindCellOnTopHitBubble(hitBubblePosition);
+			}
+
+			if(newCell != InvalidCell)
+			{
+				_AttachBubble(_hitBubble, newCell);
+				// 같은 색을 가진 bubble 을 제거
+				if (_RemoveSameColorBubbles(_hitBubble))
+				{
+					// 사라진 Bubble 들이 존재 한다면 이제 연결이 끊어진 Bubble 들을 찾아본다
+					_FallLinkOffBubbles();
+				}
+			}
+			return true;
 		}
+		return false;
 	}
 
 	public bool CheckGameOver()
@@ -347,14 +375,34 @@ public class BubbleContainer : MonoBehaviour
 			}
 		}
 	}
+
+	private Vector2 _FindCellOnTopHitBubble(Vector2 _hitBubblePosition)
+	{
+		// 천장 cell 중 가장 가까운 cell 좌표를 넘긴다
+		int foundCellX = -1;
+		float MinDist = float.PositiveInfinity;
+		for ( int i = 0; i < 8; ++i)
+		{
+			var cellCenterPosition = ConvertCellToPosition(new Vector2(i, 0));
+			float distance = (cellCenterPosition - _hitBubblePosition).magnitude;
+
+			if (MinDist > distance)
+			{
+				MinDist = distance;
+				foundCellX = i;
+			}
+		}
+		return new Vector2(foundCellX, 0);
+	}
+
 	// _hitBubble 에 부딪힌 bubble 이 배치될 위치를 반환
-	private Vector2 _FindHitBubbleAdjacentCell(Bubble _hitBubble, Vector2 _NewBubbleCenterPoistion)
+	private Vector2 _FindHitBubbleAdjacentCell(Bubble _placedBubble, Vector2 _NewBubbleCenterPoistion)
 	{
 		Vector2 adjecentCell = Vector2.zero;
 		float MinDist = float.PositiveInfinity;
-		foreach (var offset in Utility.GetAdjecentCellOffsets(_hitBubble.PlacedCell))
+		foreach (var offset in Utility.GetAdjecentCellOffsets(_placedBubble.PlacedCell))
 		{
-			var searchCell = _hitBubble.PlacedCell + offset;
+			var searchCell = _placedBubble.PlacedCell + offset;
 
 			if (searchCell.x < 0)
 			{

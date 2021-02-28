@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 // 1. 배치된 Bubble, 2. 히트한 Bubble
-public class OnBubbleHitEvent : UnityEvent<Bubble, Bubble> { };
+public class OnBubbleCollisionEvent : UnityEvent<GameObject, Bubble> { };
 
 public class Bubble : MonoBehaviour
 {
@@ -26,7 +26,8 @@ public class Bubble : MonoBehaviour
 		}
 	}
 
-	public OnBubbleHitEvent OnBubbleHit = new OnBubbleHitEvent();
+	public OnBubbleCollisionEvent OnBubbleCollision = new OnBubbleCollisionEvent();
+
 
 	public Vector2 PlacedCell { get; private set; }
 	public bool IsPlaced { get; private set; }
@@ -73,12 +74,7 @@ public class Bubble : MonoBehaviour
 		{
 			return;
 		}
-		var adjecentBubble = collision.GetComponent<Bubble>();
-		if (adjecentBubble != null)
-		{
-			//Debug.Log(string.Format("adjacent Bubble Cell X : {0}, Cell Y : {1}", adjecentBubble.PlacedCell.x, adjecentBubble.PlacedCell.y));
-			OnBubbleHit.Invoke(adjecentBubble, this);
-		}
+		OnBubbleCollision.Invoke(collision.gameObject, this);
 	}
 
 	private void _UpdateColor()

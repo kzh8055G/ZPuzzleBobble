@@ -53,6 +53,8 @@ public class BubbleMoveController : MonoBehaviour
 		, float _velocity
 		, LayerMask _contactFilterLayerMask)
 	{
+		//string strLayerName = LayerMask.LayerToName(_contactFilterLayerMask);
+
 		ShootAngle = _angle;
 		MovingDirection = Quaternion.AngleAxis(ShootAngle, Vector3.forward) * Vector3.right;
 		MovingDirection.Normalize();

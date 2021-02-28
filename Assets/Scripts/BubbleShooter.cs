@@ -45,6 +45,8 @@ public class BubbleShooter : MonoBehaviour
 
 	private TextMesh textShootInfo;
 
+	private bool canShoot = false;
+
 	private void Awake()
 	{
 		textShootInfo = GetComponentInChildren<TextMesh>();
@@ -58,6 +60,14 @@ public class BubbleShooter : MonoBehaviour
 			{
 				UpdateShootInfoText();
 				UpdateNextBubble(stage.GetNextShootBubbleColor());
+				canShoot = true;
+			}
+		);
+		stage.OnBubbleShootReady.AddListener(() =>
+			{
+				UpdateNextBubble(stage.GetNextShootBubbleColor());
+				canShoot = true;
+
 			}
 		);
 	}
@@ -94,13 +104,15 @@ public class BubbleShooter : MonoBehaviour
 		// Shooting Bobble
 		if (Input.GetKeyDown(KeyCode.S))
 		{
-			ShootBubble();
+			if (canShoot)
+			{
+				ShootBubble();
+				// 다음 방울을 결정
+				//var BubbleColors = Enum.GetValues(typeof(Bubble.EBubbleColor)).Cast<Bubble.EBubbleColor>().ToList();
+				//BubbleColor = BubbleColors[Random.Range(0, BubbleColors.Count - 1)];
 
-			// 다음 방울을 결정
-			//var BubbleColors = Enum.GetValues(typeof(Bubble.EBubbleColor)).Cast<Bubble.EBubbleColor>().ToList();
-			//BubbleColor = BubbleColors[Random.Range(0, BubbleColors.Count - 1)];
-			UpdateNextBubble(stage.GetNextShootBubbleColor());
-
+				canShoot = false;
+			}
 		}
 		// {@ Cheat Change Bubble Color
 		if (Input.GetKeyDown(KeyCode.R))
