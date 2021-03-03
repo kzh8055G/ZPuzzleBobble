@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 public class BubbleShooter : MonoBehaviour
@@ -37,7 +38,6 @@ public class BubbleShooter : MonoBehaviour
 	private RaycastHit2D[] hitBuffer = new RaycastHit2D[3];
 	private ContactFilter2D contactFilter;
 	private Vector2[] raycastPositions = new Vector2[3];
-
 #endregion
 	float shootAngle = 90f;
 
@@ -46,6 +46,16 @@ public class BubbleShooter : MonoBehaviour
 	private TextMesh textShootInfo;
 
 	private bool canShoot = false;
+
+	[SerializeField]
+	private Button buttonLeftRotate;
+	[SerializeField]
+	private Button buttonRightRotate;
+	[SerializeField]
+	private Button buttonShootBubble;
+
+	private bool leftRotateButtonPused = false;
+	private bool rightRotateButtonPushed = false;
 
 	private void Awake()
 	{
@@ -70,6 +80,39 @@ public class BubbleShooter : MonoBehaviour
 
 			}
 		);
+
+		if(buttonShootBubble != null)
+		{
+			buttonShootBubble.onClick.AddListener(() => ShootBubble());
+		}
+		if(buttonLeftRotate != null)
+		{
+			var trigger = buttonLeftRotate.GetComponent<EventTriggerTest>();
+			if(trigger != null)
+			{
+				trigger.AddUpListener((_data) => { 
+					leftRotateButtonPused = false; 
+				});
+				trigger.AddDownListener((_data) => { 
+					leftRotateButtonPused = true; 
+				});
+			}
+
+		}
+		if(buttonRightRotate != null)
+		{
+			var trigger = buttonRightRotate.GetComponent<EventTriggerTest>();
+			if (trigger != null)
+			{
+				trigger.AddUpListener((_data) => { 
+					rightRotateButtonPushed = false; 
+				});
+				trigger.AddDownListener((_data) => { 
+					rightRotateButtonPushed = true; 
+				});
+			}
+		}
+
 	}
 
 	// Start is called before the first frame update
@@ -82,7 +125,25 @@ public class BubbleShooter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+		//if (Input.touchCount > 0)
+		//{
+		//	for(int i = 0; i < Input.touchCount; ++i)
+		//	{
+		//		var touch = Input.GetTouch(i);
+		//	}
 
+
+
+		//}
+		if(leftRotateButtonPused )
+		{
+			shootAngle += Time.deltaTime * shootAngleChangeVelocity;
+		}
+		if(rightRotateButtonPushed )
+		{
+			shootAngle -= Time.deltaTime * shootAngleChangeVelocity;
+		}
+		
 		// {@ Change Shoot Angle
 		if ( Input.GetKey(KeyCode.A))
 		{
@@ -104,15 +165,7 @@ public class BubbleShooter : MonoBehaviour
 		// Shooting Bobble
 		if (Input.GetKeyDown(KeyCode.S))
 		{
-			if (canShoot)
-			{
-				ShootBubble();
-				// 다음 방울을 결정
-				//var BubbleColors = Enum.GetValues(typeof(Bubble.EBubbleColor)).Cast<Bubble.EBubbleColor>().ToList();
-				//BubbleColor = BubbleColors[Random.Range(0, BubbleColors.Count - 1)];
-
-				canShoot = false;
-			}
+			ShootBubble();
 		}
 		// {@ Cheat Change Bubble Color
 		if (Input.GetKeyDown(KeyCode.R))
@@ -145,6 +198,10 @@ public class BubbleShooter : MonoBehaviour
 
 	private void ShootBubble()
 	{
+		if(!canShoot)
+		{
+			return;
+		}
 		var Instance = GameObject.Instantiate(BubblePrefab, transform);
 		if (Instance != null)
 		{
@@ -155,6 +212,7 @@ public class BubbleShooter : MonoBehaviour
 
 			stage.OnShootBubbleObject(Instance);
 		}
+		canShoot = false;
 	}
 
 	private void UpdateNextBubble(EBubbleColor _bubbleColor)
