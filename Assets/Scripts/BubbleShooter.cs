@@ -6,6 +6,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
+public interface IShootDirectionControlable
+{
+	EDirection CurrentDirection { get; }
+}
 public class BubbleShooter : MonoBehaviour
 {
 	[SerializeField]
@@ -29,6 +33,14 @@ public class BubbleShooter : MonoBehaviour
 	[SerializeField]
 	bool enablePreviewHitBubble = false;
 
+	[SerializeField]
+	private GameObject directionControllerObject;
+	[SerializeField]
+	private Button buttonShootBubble;
+
+	[SerializeField]
+	private Transform shootArrowTransform;
+
 	#region Raycast
 	[SerializeField]
 	private LayerMask reflectLayerMask;
@@ -38,7 +50,7 @@ public class BubbleShooter : MonoBehaviour
 	private RaycastHit2D[] hitBuffer = new RaycastHit2D[3];
 	private ContactFilter2D contactFilter;
 	private Vector2[] raycastPositions = new Vector2[3];
-#endregion
+	#endregion
 	float shootAngle = 90f;
 
 	private EBubbleColor BubbleColor = EBubbleColor.Blue;
@@ -47,21 +59,16 @@ public class BubbleShooter : MonoBehaviour
 
 	private bool canShoot = false;
 
-	[SerializeField]
-	private Button buttonLeftRotate;
-	[SerializeField]
-	private Button buttonRightRotate;
-	[SerializeField]
-	private Button buttonShootBubble;
-
-	private bool leftRotateButtonPused = false;
-	private bool rightRotateButtonPushed = false;
+	private IShootDirectionControlable directionController;
 
 	private void Awake()
 	{
+		if( directionControllerObject != null )
+		{
+			directionController = directionControllerObject.GetComponent<IShootDirectionControlable>();
+		}
 		textShootInfo = GetComponentInChildren<TextMesh>();
 
-		//LayerMask.NameToLayer()
 		contactFilter.layerMask = reflectLayerMask;
 		contactFilter.useLayerMask = true;
 		contactFilter.useTriggers = false;
@@ -77,73 +84,24 @@ public class BubbleShooter : MonoBehaviour
 			{
 				UpdateNextBubble(stage.GetNextShootBubbleColor());
 				canShoot = true;
-
 			}
 		);
-
-		if(buttonShootBubble != null)
+		if (buttonShootBubble != null)
 		{
 			buttonShootBubble.onClick.AddListener(() => ShootBubble());
 		}
-		if(buttonLeftRotate != null)
-		{
-			var trigger = buttonLeftRotate.GetComponent<EventTriggerTest>();
-			if(trigger != null)
-			{
-				trigger.AddUpListener((_data) => { 
-					leftRotateButtonPused = false; 
-				});
-				trigger.AddDownListener((_data) => { 
-					leftRotateButtonPused = true; 
-				});
-			}
-
-		}
-		if(buttonRightRotate != null)
-		{
-			var trigger = buttonRightRotate.GetComponent<EventTriggerTest>();
-			if (trigger != null)
-			{
-				trigger.AddUpListener((_data) => { 
-					rightRotateButtonPushed = false; 
-				});
-				trigger.AddDownListener((_data) => { 
-					rightRotateButtonPushed = true; 
-				});
-			}
-		}
-
 	}
-
-	// Start is called before the first frame update
-	void Start()
-    {
-		//UpdateShootInfoText();
-		//UpdateNextBubble(stage.GetNextShootBubbleColor());
-	}
-
     // Update is called once per frame
     void Update()
     {
-		//if (Input.touchCount > 0)
-		//{
-		//	for(int i = 0; i < Input.touchCount; ++i)
-		//	{
-		//		var touch = Input.GetTouch(i);
-		//	}
-
-
-
-		//}
-		if(leftRotateButtonPused )
+		if ((directionController.CurrentDirection & EDirection.Left) == EDirection.Left)
 		{
 			shootAngle += Time.deltaTime * shootAngleChangeVelocity;
 		}
-		if(rightRotateButtonPushed )
+		if ((directionController.CurrentDirection & EDirection.Right) == EDirection.Right)
 		{
 			shootAngle -= Time.deltaTime * shootAngleChangeVelocity;
 		}
-		
 		// {@ Change Shoot Angle
 		if ( Input.GetKey(KeyCode.A))
 		{
@@ -194,6 +152,10 @@ public class BubbleShooter : MonoBehaviour
 		ShootDirection.Normalize();
 
 		DrawShootGuide(ShootDirection, shootGuideLength);
+
+
+		shootArrowTransform.localRotation = Quaternion.Euler(0, 0, 180 + shootAngle);
+
 	}
 
 	private void ShootBubble()
