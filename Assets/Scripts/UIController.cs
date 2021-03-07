@@ -19,7 +19,6 @@ public class BubbleColorData
 
 }
 
-
 public class UIController : MonoBehaviour
 {
 	[SerializeField]
@@ -39,6 +38,9 @@ public class UIController : MonoBehaviour
 
 	[SerializeField]
 	private Button buttonSave;
+
+	[SerializeField]
+	private float ButtonOutLineWidth = 0.003f;
 
 	public OnChangeBubbleColorEvent OnChangeBubbleColor = new OnChangeBubbleColorEvent();
 
@@ -66,11 +68,12 @@ public class UIController : MonoBehaviour
 	{
 		// TODO : 색 변경 버튼이 눌리면 noti 를 날려야한다
 
-		foreach(var bubbleColor in bubbleColorDataList)
+		foreach(var data in bubbleColorDataList)
 		{
-			bubbleColor.ButtonColor.onClick.AddListener(() =>
+			data.ButtonColor.onClick.AddListener(() =>
 				{
-					OnChangeBubbleColor.Invoke(bubbleColor.Color);
+					_DrawButtonOutline(data.ButtonColor);
+					OnChangeBubbleColor.Invoke(data.Color);
 				}
 			);
 		}
@@ -80,17 +83,31 @@ public class UIController : MonoBehaviour
 
 		buttonLoad.onClick.AddListener(() => OnClickLoad.Invoke());
 		buttonSave.onClick.AddListener(() => OnClickSave.Invoke());
-
 	}
 
-	void Start()
+	private void _DrawButtonOutline( Button _button)
     {
-        
-    }
+		var rectT = _button.transform as RectTransform;
+		if (rectT)
+		{
+			Vector2 centerPos = rectT.position;
+			float halfHeight = rectT.rect.size.x / 2;
+			float halfWidth = rectT.rect.size.y / 2;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+			var LT = Camera.main.ScreenToWorldPoint(new Vector2(centerPos.x - halfWidth, centerPos.y + halfHeight));
+			var RB = Camera.main.ScreenToWorldPoint(new Vector2(centerPos.x + halfWidth, centerPos.y - halfHeight));
+
+			List<Vector2> points = new List<Vector2>();
+			// left, top
+			points.Add(LT);
+			// right, top
+			points.Add(new Vector2(RB.x, LT.y));
+			// right, bottom
+			points.Add(RB);
+			// left, bottom
+			points.Add(new Vector2(LT.x, RB.y));
+
+			Utility.DrawLinesWithLineRenderer(points, gameObject, Color.green, ButtonOutLineWidth);
+		}
+	}
 }

@@ -33,14 +33,14 @@ public class Bubble : MonoBehaviour
 	public bool IsPlaced { get; private set; }
 	
 	private Animator animator;
-	private SpriteRenderer renderer;
+	private SpriteRenderer spriteRenderer;
 
 	private TextMesh debugText;
 
 	private void Awake()
 	{
 		animator = GetComponentInChildren<Animator>();
-		renderer = GetComponentInChildren<SpriteRenderer>();
+		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
 		debugText = GetComponentInChildren<TextMesh>();
 		debugText.text = string.Empty;
@@ -102,7 +102,7 @@ public class Bubble : MonoBehaviour
 
 	public void SetSpritePostion(Vector2 _position)
 	{
-		renderer.transform.localPosition = _position;
+		spriteRenderer.transform.localPosition = _position;
 	}
 
 	public void Boom()
@@ -220,11 +220,23 @@ public class Bubble : MonoBehaviour
 			int secondIndex = i >= 5 ? 0 : i + 1;
 			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
 
-			Debug.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
+			Utility.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
 		}
 	}
+	public static void GetHexgonPoints(Vector2 _center, float _CellRadius, ref List<Vector2> outPoints)
+	{
+		Vector2 CenterPos = new Vector2(_center.x, _center.y);
+		for (int i = 0; i < 6; ++i)
+		{
+			Vector2 firstPoint = CenterPos + hexagonPoints[i] * _CellRadius;
+			int secondIndex = i >= 5 ? 0 : i + 1;
+			Vector2 secondPoint = CenterPos + hexagonPoints[secondIndex] * _CellRadius;
 
-
+			outPoints.Add(firstPoint);
+			outPoints.Add(secondPoint);
+			//Utility.DrawLine(firstPoint, secondPoint, _color);// presetColors[i]);
+		}
+	}
 	#endregion
 
 }
