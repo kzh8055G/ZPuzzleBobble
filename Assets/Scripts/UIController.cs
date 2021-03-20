@@ -42,6 +42,9 @@ public class UIController : MonoBehaviour
 	[SerializeField]
 	private float ButtonOutLineWidth = 0.003f;
 
+	[SerializeField] 
+	private Shader lineShader;
+	
 	public OnChangeBubbleColorEvent OnChangeBubbleColor = new OnChangeBubbleColorEvent();
 
 	public UnityEvent OnClickLoad = new UnityEvent();
@@ -91,8 +94,8 @@ public class UIController : MonoBehaviour
 		if (rectT)
 		{
 			Vector2 centerPos = rectT.position;
-			float halfHeight = rectT.rect.size.x / 2;
-			float halfWidth = rectT.rect.size.y / 2;
+			float halfHeight = rectT.rect.size.x * rectT.lossyScale.x / 2;
+			float halfWidth = rectT.rect.size.y * rectT.lossyScale.y / 2;
 
 			var LT = Camera.main.ScreenToWorldPoint(new Vector2(centerPos.x - halfWidth, centerPos.y + halfHeight));
 			var RB = Camera.main.ScreenToWorldPoint(new Vector2(centerPos.x + halfWidth, centerPos.y - halfHeight));
@@ -107,7 +110,8 @@ public class UIController : MonoBehaviour
 			// left, bottom
 			points.Add(new Vector2(LT.x, RB.y));
 
-			Utility.DrawLinesWithLineRenderer(points, gameObject, Color.green, ButtonOutLineWidth);
+			float lineWidth = ButtonOutLineWidth * Mathf.Max(rectT.lossyScale.x, 1f); 
+			Utility.DrawLinesWithLineRenderer(points, gameObject, Color.green, lineShader, lineWidth);
 		}
 	}
 }

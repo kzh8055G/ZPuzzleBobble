@@ -104,6 +104,7 @@ public class Utility
 		List<Vector2> _points, 
 		GameObject _renderObject,
 		Color _color,
+		Shader _shader,
 		float _lineWidth = 0.003f,
 		bool _polygonPoints = true)
 	{
@@ -113,7 +114,7 @@ public class Utility
 			renderer = _renderObject.AddComponent<LineRenderer>();
 		}
 		_renderObject.transform.position = Vector3.zero;
-		renderer.material = new Material(Shader.Find(@"Legacy Shaders/Particles/Alpha Blended Premultiply"));
+		renderer.material = new Material(_shader);//Shader.Find(@"Legacy Shaders/Particles/Alpha Blended Premultiply"));
 		
 		renderer.startColor = Color.green;
 		renderer.endColor = Color.green;

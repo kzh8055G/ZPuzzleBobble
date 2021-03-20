@@ -46,6 +46,13 @@ public class TestEdit : MonoBehaviour
 	private float cellRadius = 0.1f;
 	#endregion
 
+	#region HexagonLineMaterial
+	[SerializeField] 
+	private Shader lineShader;
+	
+
+	#endregion
+	
 	private EBubbleEditMode CurrentEditMode = EBubbleEditMode.Add;
 	private EBubbleColor CurrentBubbleColor = EBubbleColor.None;
 	private List<Bubble> BubbleContainer = new List<Bubble>();
@@ -189,7 +196,7 @@ public class TestEdit : MonoBehaviour
 
                 var cellRenderObject = new GameObject($"{cx}:{cy}");
                 cellRenderObject.transform.SetParent(cellRoot.transform);
-                Utility.DrawLinesWithLineRenderer(cellsPoints, cellRenderObject, Color.green, 0.003f, false);
+                Utility.DrawLinesWithLineRenderer(cellsPoints, cellRenderObject, Color.green, lineShader, 0.003f, false);
             }
         }
 	}
