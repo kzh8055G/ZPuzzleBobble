@@ -16,7 +16,19 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 1874b21686c028a4baee7f910c2d37d9
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: d3b4b460b02ccdd46a6880107d71ebf0
+    m_Address: Assets/Prefabs/Test.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
+  - m_GUID: bb900ee30dd89bd41a0a4604e718c974
+    m_Address: Assets/Sounds/BGM/01.title demonstration.mp3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d8d9660a855a01644b9940746f5d0a7d, type: 2}
   m_SchemaSet:

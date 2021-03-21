@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace ZPuzzleBubble
 {
@@ -22,7 +23,32 @@ namespace ZPuzzleBubble
         private readonly string addressDefaultLevelData = @"Assets/Levels/default_levels.json";
         
         private Dictionary<int, Level> levels = new Dictionary<int, Level>();
+        
+        // Test
+        public void DownloadLevel()
+        {
+            // ClearDependencyCacheAsync 호출시 다음의 Exception 이 발생한다
+            // -> Exception: Attempting to use an invalid operation handle
+            //Addressables.ClearDependencyCacheAsync(addressDefaultLevelData); 
 
+
+            Addressables.GetDownloadSizeAsync(addressDefaultLevelData).Completed += (_op) =>
+            {
+                Debug.Log(_op.Result);
+                if (_op.Result > 0)
+                {
+                    Addressables.DownloadDependenciesAsync(addressDefaultLevelData).Completed += ( _op) => 
+                    {
+                        if (_op.Status == AsyncOperationStatus.Succeeded)
+                        {
+                            Debug.Log("Download Completed");
+                        }
+                    };
+                }
+            };
+        }
+        
+        
         public void LoadLevelData(Action<bool> _onCompleted = null)
         {
             List<string> cachePaths = new List<string>();
