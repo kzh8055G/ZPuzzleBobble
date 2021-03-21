@@ -6,7 +6,9 @@ using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using ZPuzzleBubble;
 
 // [출처] https://dobby-the-house-elf.tistory.com/62
 
@@ -61,6 +63,8 @@ public class TestEdit : MonoBehaviour
 
 	private void Awake()
 	{
+		LevelDataManager.Instance.LoadLevelData(
+			(_success) => Debug.Log("Load Completed!"));
 		if(PreviewBubble)
         {
 			PreviewBubble.SetActive(false);
@@ -98,10 +102,12 @@ public class TestEdit : MonoBehaviour
 			uiController.OnClickLoad.AddListener(() =>
 				{
 					// Load
-					if (ManageLevelData.LoadFromFile())
-					{
-						OnLoad(currentLevelNumber);
-					}
+					// if (ManageLevelData.LoadFromFile())
+					// {
+					// 	OnLoad(currentLevelNumber);
+					// }
+					LevelDataManager.Instance.LoadLevelData( 
+						(_success)=> OnLoad(currentLevelNumber));
 				}
 			);
 			uiController.OnClickSave.AddListener(() =>
@@ -116,17 +122,30 @@ public class TestEdit : MonoBehaviour
 
 						level.Bubbles.Add(bubbleData);
 					}
-					if (ManageLevelData.Levels.ContainsKey(currentLevelNumber))
-					{
-						ManageLevelData.Levels.Remove(currentLevelNumber);
-					}
-					ManageLevelData.Levels.Add(currentLevelNumber, level);
-					ManageLevelData.SaveToFile();
+					LevelDataManager.Instance.SaveLevel(currentLevelNumber, level);
+					// if (ManageLevelData.Levels.ContainsKey(currentLevelNumber))
+					// {
+					// 	ManageLevelData.Levels.Remove(currentLevelNumber);
+					// }
+					// ManageLevelData.Levels.Add(currentLevelNumber, level);
+					// ManageLevelData.SaveToFile();
 				}
 			);
+
+			uiController.OnClickGoToMain.AddListener(() =>
+			{
+				SceneManager.LoadSceneAsync("Main");
+			});
+			
+			uiController.OnClickTestPlay.AddListener(() =>
+			{
+				//SceneManager.LoadSceneAsync("InGame");
+				TestPlayManager.Instance.PlayTestMode(currentLevelNumber);
+			});
+
 			uiController.SetOnChangeLevelListener(OnChangeLevel);
 		}
-		ManageLevelData.LoadFromFile();
+		//ManageLevelData.LoadFromFile();
 	}
 	void Start()
     {
@@ -212,17 +231,33 @@ public class TestEdit : MonoBehaviour
 
 	private void OnLoad(int _levelNumber)
 	{
-		if( ManageLevelData.LoadFromFile())
+		//if( ManageLevelData.LoadFromFile())
 		{
 			_ClearAllBubbles();
-			if ( ManageLevelData.Levels.ContainsKey(_levelNumber))
+			// if ( ManageLevelData.Levels.ContainsKey(_levelNumber))
+			// {
+			// 	var level = ManageLevelData.Levels[_levelNumber];
+			//
+			// 	// 컨테이너에 든 방울 모두 제거
+			// 	if(level != null)
+			// 	{
+			// 		foreach (var bubble in level.Bubbles)
+			// 		{
+			// 			_CreateAndAttachBubble(
+			// 				new Vector2(bubble.Cell.x, bubble.Cell.y),
+			// 				bubble.Color);
+			// 		}
+			// 	}
+			// }
+			Level currentLevel;
+			if ( LevelDataManager.Instance.TryGetLevel(_levelNumber, out currentLevel))
 			{
-				var level = ManageLevelData.Levels[_levelNumber];
+				//var level = ManageLevelData.Levels[_levelNumber];
 
 				// 컨테이너에 든 방울 모두 제거
-				if(level != null)
+				if(currentLevel != null)
 				{
-					foreach (var bubble in level.Bubbles)
+					foreach (var bubble in currentLevel.Bubbles)
 					{
 						_CreateAndAttachBubble(
 							new Vector2(bubble.Cell.x, bubble.Cell.y),

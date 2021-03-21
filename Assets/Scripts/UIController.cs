@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 #region Events
@@ -24,6 +25,11 @@ public class UIController : MonoBehaviour
 	[SerializeField]
 	private List<BubbleColorData> bubbleColorDataList = new List<BubbleColorData>();
 
+	#region Button
+
+	
+
+	
 	[SerializeField]
 	private Button buttonPrevLevel;
 
@@ -39,6 +45,14 @@ public class UIController : MonoBehaviour
 	[SerializeField]
 	private Button buttonSave;
 
+	[SerializeField] 
+	private Button buttonGoToMain;
+
+	[SerializeField] 
+	private Button buttonTestPlay;
+	
+	#endregion
+	
 	[SerializeField]
 	private float ButtonOutLineWidth = 0.003f;
 
@@ -52,7 +66,11 @@ public class UIController : MonoBehaviour
 
 	public UnityEvent OnClickNextLevel = new UnityEvent();
 	public UnityEvent OnClickPrevLevel = new UnityEvent();
-
+	
+	//[FormerlySerializedAs("onClickGoToMain")] 
+	public UnityEvent OnClickGoToMain = new UnityEvent();
+	public UnityEvent OnClickTestPlay = new UnityEvent();
+	
 	public void SetOnChangeLevelListener(OnChangeLevelEvent _event)
 	{
 		_event.AddListener((_currentLevel) =>
@@ -86,6 +104,9 @@ public class UIController : MonoBehaviour
 
 		buttonLoad.onClick.AddListener(() => OnClickLoad.Invoke());
 		buttonSave.onClick.AddListener(() => OnClickSave.Invoke());
+		
+		buttonGoToMain.onClick.AddListener( ()=> OnClickGoToMain?.Invoke());
+		buttonTestPlay.onClick.AddListener(()=> OnClickTestPlay?.Invoke());
 	}
 
 	private void _DrawButtonOutline( Button _button)

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -9,6 +10,7 @@ using UnityEngine;
 
 // * 모바일에선 Application.dataPath, Application.persistentDataPath 디렉토리 외엔 데이터를
 // 저장할수 없다
+[Obsolete]
 public static class ManageLevelData
 {
 	private static string levelDataFilePath => Path.Combine(Application.persistentDataPath, @"levels.json");

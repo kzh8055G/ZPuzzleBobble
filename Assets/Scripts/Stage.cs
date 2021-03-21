@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using ZPuzzleBubble;
 using Random = UnityEngine.Random;
 
 public class OnLevelStartEvent : UnityEvent<int> {};
@@ -91,15 +92,25 @@ public class Stage : MonoBehaviour
 		bubbleContainer.onBubbleFall.AddListener( 
 			(_count)=> scoreCalculator.OnFallBubbles(_count));
 
-		ManageLevelData.LoadFromFile();
+		//ManageLevelData.LoadFromFile();
 	}
 
 	void Start()
 	{
-		// load level data
-		_StartLevel();
+		LevelDataManager.Instance.LoadLevelData((_success) =>
+		{
+			if (_success)
+			{
+				_OnLevelLoaded();
+			}
+			// TODO : 로드 실패시에 대한 대응
+		});
 	}
 
+	public void PlayTestMode(int _level)
+	{
+		currentLevelNumber = _level;
+	}
 	public EBubbleColor GetNextShootBubbleColor()
 	{
 		return shootBubblePreset[Random.Range(0, shootBubblePreset.Count)];
@@ -115,12 +126,11 @@ public class Stage : MonoBehaviour
 		bubbleContainer.UpdateShootBubblePreset(ref shootBubblePreset);
 	}
 
-	private void _StartLevel()
+	private void _OnLevelLoaded()
 	{
-		if (ManageLevelData.GetLevel(currentLevelNumber, out currentLevel))
+		if (LevelDataManager.Instance.TryGetLevel(currentLevelNumber, out currentLevel))
 		{
 			bubbleContainer.StartLevel(currentLevel);
-			//_LoadCurrentLevel();
 		}
 		_UpdateShootBubblePreset();
 
@@ -246,7 +256,7 @@ public class Stage : MonoBehaviour
 
 		// go to next level
 		++currentLevelNumber;
-		_StartLevel();
+		_OnLevelLoaded();
 	}
 	// TODO : 
 	private Vector2 ConvertPositionToCell(Vector2 _Postion)

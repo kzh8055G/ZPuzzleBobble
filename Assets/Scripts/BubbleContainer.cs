@@ -62,7 +62,6 @@ public class BubbleContainer : MonoBehaviour
 			initBubbleParentPoistion = bubbleParent.transform.localPosition;
 		}
 	}
-
 	public void StartLevel(Level _level)
 	{
 		StopVibrate();
