@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -41,6 +42,8 @@ public class BubbleContainer : MonoBehaviour
 	public OnBubbleBoomEvent onBubbleBoom = new OnBubbleBoomEvent();
 	public OnBubbleFallEvent onBubbleFall = new OnBubbleFallEvent();
 
+	public Subject<Unit> OnDownTopCompleted = new Subject<Unit>();
+	
 	private static Vector2 InvalidCell = new Vector2(-1, -1);
 
 	private void Awake()
@@ -129,8 +132,10 @@ public class BubbleContainer : MonoBehaviour
 	public void StartVibrate(int _step)
 	{
 		StopVibrate();
-		coroutineVibrate = StartCoroutine(_Vibrate(_step));
-
+		if (_step > 0)
+		{
+			coroutineVibrate = StartCoroutine(_Vibrate(_step));
+		}
 	}
 
 	public void StopVibrate()
@@ -505,6 +510,7 @@ public class BubbleContainer : MonoBehaviour
 			sideParent.transform.localPosition =
 				new Vector2(currPostion.x, currPostion.y - deltaHeight);
 		}
+		OnDownTopCompleted.OnNext(Unit.Default);
 	}
 
 	#region debug 

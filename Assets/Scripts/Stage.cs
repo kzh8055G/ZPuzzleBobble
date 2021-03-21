@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx;
 using UnityEngine;
 using UnityEngine.Events;
 using ZPuzzleBubble;
@@ -60,10 +61,12 @@ public class Stage : MonoBehaviour
 	private Level currentLevel = null;
 	#endregion
 
-	private int currentShootCount = 0;
-
+	private CompositeDisposable disposables = new CompositeDisposable();
+	
+	private ReactiveProperty<int> currentShootCount = new ReactiveProperty<int>(0);
+	
 	// TODO : 이것도 레벨에서 값을 저장하는게 어떠한가?
-	private int vibrateStartShootCount = 10;
+	private int vibrateStartShootCount = 1;
 
 	public OnLevelStartEvent OnLevelStart = new OnLevelStartEvent();
 	public OnLevelClearEvent OnLevelClear = new OnLevelClearEvent();
@@ -92,9 +95,16 @@ public class Stage : MonoBehaviour
 		bubbleContainer.onBubbleFall.AddListener( 
 			(_count)=> scoreCalculator.OnFallBubbles(_count));
 
-		//ManageLevelData.LoadFromFile();
-	}
 
+		bubbleContainer.OnDownTopCompleted
+			.Subscribe(_ => currentShootCount.Value = 0)
+			.AddTo(disposables);
+
+		currentShootCount
+			.Subscribe(_ => _OnChangeShootCount())
+			.AddTo(disposables);
+	}
+	
 	void Start()
 	{
 		LevelDataManager.Instance.LoadLevelData((_success) =>
@@ -141,8 +151,8 @@ public class Stage : MonoBehaviour
 			AudioSourceComponent.Play();
 		}
 
-		currentShootCount = 0;
-
+		currentShootCount.Value = 0;
+		
 		OnLevelStart.Invoke(currentLevelNumber);
 
 	}
@@ -171,10 +181,8 @@ public class Stage : MonoBehaviour
 				_OnGameOver();
 				return;
 			}
-			++currentShootCount;
-			_OnChangeShootCount();
+			++currentShootCount.Value;
 			_UpdateShootBubblePreset();
-
 			OnBubbleShootReady.Invoke();
 		}
 	}
@@ -190,15 +198,15 @@ public class Stage : MonoBehaviour
 
 	private void _OnChangeShootCount()
 	{
-		if (currentShootCount > vibrateStartShootCount)
+		if (currentShootCount.Value >= vibrateStartShootCount)
 		{
-			int vibrationStep = (currentShootCount - vibrateStartShootCount);
+			int vibrationStep = (currentShootCount.Value - vibrateStartShootCount);
 			bool downTop = (vibrationStep > 2);
 
 			if(downTop)
 			{
 				// reset
-				currentShootCount = 0;
+				currentShootCount.Value = 0;
 				bubbleContainer.DownTop();
 			}
 			else
